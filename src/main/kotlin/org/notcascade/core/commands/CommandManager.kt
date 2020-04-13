@@ -9,7 +9,7 @@ import org.slf4j.Logger
 
 class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
     val root = Node<Pair<Command, String>>()
-    val logger : Logger = get()
+    val logger: Logger = get()
 
     init {
         commands.forEach {
@@ -18,7 +18,7 @@ class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
         }
     }
 
-    fun handleCommand(rawMsg : String, event : GuildMessageReceivedEvent) {
+    fun handleCommand(rawMsg: String, event: GuildMessageReceivedEvent) {
         if (event.author.isBot) return
 
         val pair = root.find(rawMsg)
@@ -37,7 +37,7 @@ class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
         }
 
         if (pass) {
-            logger.info(String.format("%s executing command %s",  event.author.asTag, cmd.key))
+            logger.info(String.format("%s executing command %s", event.author.asTag, cmd.key))
             cmd.exec(ctx)
         } else {
             logger.info(String.format("%s failed middleware checks for %s", event.author.asTag, cmd.key))

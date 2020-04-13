@@ -6,8 +6,8 @@ import org.koin.core.KoinComponent
 import org.koin.core.get
 
 class JDA() : KoinComponent {
-    private val msgListener : MessageListener = get()
-    private val config : Config = get()
+    private val msgListener: MessageListener = get()
+    private val config: Config = get()
 
     fun start() {
         val jda = JDABuilder.createDefault(config["bot.token"])

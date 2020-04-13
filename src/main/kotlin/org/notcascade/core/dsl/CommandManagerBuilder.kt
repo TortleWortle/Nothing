@@ -6,11 +6,11 @@ import org.notcascade.core.commands.Module
 class CommandManagerBuilder {
     private val commands = ArrayList<Command>()
 
-    fun build() : CommandManager {
+    fun build(): CommandManager {
         return CommandManager(commands)
     }
 
-    fun module(module : Module, init: ModuleBuilder.() -> Unit) {
+    fun module(module: Module, init: ModuleBuilder.() -> Unit) {
         val builder = ModuleBuilder(module).apply(init)
         commands.addAll(builder.build())
     }
@@ -20,4 +20,4 @@ class CommandManagerBuilder {
     }
 }
 
-fun commandManager(init: CommandManagerBuilder.() -> Unit) : CommandManager = CommandManagerBuilder().apply(init).build()
+fun commandManager(init: CommandManagerBuilder.() -> Unit): CommandManager = CommandManagerBuilder().apply(init).build()

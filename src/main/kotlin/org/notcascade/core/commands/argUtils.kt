@@ -1,8 +1,6 @@
 package org.notcascade.core.commands
 
-import kotlin.RuntimeException
-
-fun splitContent(msg : String) : Array<String> {
+fun splitContent(msg: String): Array<String> {
     val ret = ArrayList<String>()
     var inString = false
     var buffer = ""
@@ -12,7 +10,7 @@ fun splitContent(msg : String) : Array<String> {
             if (s.startsWith("\"")) {
                 buffer += s.substring(1)
                 inString = true
-            } else if (s != ""){
+            } else if (s != "") {
                 acc.add(s)
             }
         } else {
@@ -36,7 +34,7 @@ fun splitContent(msg : String) : Array<String> {
     return ret.toTypedArray()
 }
 
-fun mapArgs(rawInput : String, rawRoute : String) : Map<String, String> {
+fun mapArgs(rawInput: String, rawRoute: String): Map<String, String> {
     val ret = HashMap<String, String>()
     val input = splitContent(rawInput)
     val routeParts = rawRoute.split(" ")
@@ -65,10 +63,10 @@ fun mapArgs(rawInput : String, rawRoute : String) : Map<String, String> {
     return ret
 }
 
-class InvalidRouteException(override val message : String) : RuntimeException()
+class InvalidRouteException(override val message: String) : RuntimeException()
 
 // no real rules except that it can only have *concat at the end
-fun validateRoute(route : String) {
+fun validateRoute(route: String) {
     val concats = route.split(" ").count { it.startsWith("*") }
 
     if (concats > 1) {

@@ -7,10 +7,9 @@ import org.notcascade.core.commands.CommandManager
 import org.notcascade.core.commands.Module
 import org.notcascade.core.dsl.commandManager
 import org.notcascade.modules.core.getCoreModuleCommands
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-fun main(args : Array<String>) {
+fun main(args: Array<String>) {
     val myModule = module {
         single {
             getCommandManager()
@@ -30,7 +29,7 @@ fun main(args : Array<String>) {
     jda.start()
 }
 
-fun getCommandManager() : CommandManager {
+fun getCommandManager(): CommandManager {
     return commandManager {
         module { getCoreModuleCommands() }
         module(Module.MUSIC) {

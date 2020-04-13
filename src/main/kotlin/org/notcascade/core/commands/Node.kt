@@ -1,7 +1,5 @@
 package org.notcascade.core.commands
 
-import java.lang.RuntimeException
-
 open class Node<T>(
     private val key: String = "RootNode",
     private val static: Boolean = false,
