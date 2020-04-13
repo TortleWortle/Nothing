@@ -84,21 +84,20 @@ open class Node<T>(private val key : String = "RootNode", private val static : B
 
     private fun splitRoute(route : String, value : T, onlyStatic: Boolean = false) : ArrayList<Node<T>> {
         val ret = ArrayList<Node<T>>()
-
         for (it in route.split(" ")) {
-            if(it.startsWith("*")) {
+            val escaped = it.startsWith("\\")
+            val key = if (escaped) it.removePrefix("\\") else it
 
-                ret.add(Node(it, onlyStatic, null, it.endsWith("?")))
+            if(key.startsWith("*") && !escaped) {
+                ret.add(Node(key, onlyStatic, null, key.endsWith("?")))
                 break
             }
-            if (it.startsWith(":")) {
-                ret.add(Node(it, onlyStatic, null, it.endsWith("?")))
+            if (key.startsWith(":") && !escaped) {
+                ret.add(Node(key, onlyStatic, null, key.endsWith("?")))
             } else {
-                ret.add(Node(it, true, null))
+                ret.add(Node(key, true, null))
             }
         }
-
-
         ret.last().value = value
 
         return ret

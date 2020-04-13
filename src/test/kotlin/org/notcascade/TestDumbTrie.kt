@@ -73,4 +73,24 @@ class TestDumbTrie {
         assertEquals("todo :id edit", root.find("todo 1 edit"))
         assertEquals("todo :id :action", root.find("todo 2 remove"))
     }
+
+    @Test
+    fun test() {
+        val root = Node<String>("rootNode", true)
+        root.addRoute("todo :id edit", "edit :id")
+        root.addRoute("todo :id test test", "edit :id test test")
+
+        assertEquals("edit :id", root.find("todo 1 edit"))
+        assertEquals("edit :id test test", root.find("todo 1 test test"))
+    }
+
+    @Test
+    fun testEscaping() {
+        val root = Node<String>("rootNode", true)
+        root.addRoute("todo \\:id edit", "edit :id")
+
+        assertEquals("edit :id", root.find("todo :id edit"))
+        assertNotEquals("edit :id", root.find("todo \\:id edit"))
+        assertNotEquals("edit :id", root.find("todo 123 edit"))
+    }
 }
