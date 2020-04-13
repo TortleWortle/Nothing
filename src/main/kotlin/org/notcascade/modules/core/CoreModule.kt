@@ -6,7 +6,7 @@ import org.notcascade.core.dsl.moduleBuilder
 
 fun getCoreModuleCommands() : ArrayList<Command> {
     return moduleBuilder(Module.CORE) {
-        lambdaCommand("test") {
+        command("test") {
             description = "A test command"
             exec = { ctx ->
                 ctx.reply("Message from command :^)")

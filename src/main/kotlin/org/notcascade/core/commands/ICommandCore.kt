@@ -8,11 +8,11 @@ interface ICommandCore {
         return ""
     }
 
-    fun middleware() : List<ICommandMiddleware> {
-        return listOf();
+    fun middleware() : ArrayList<(CommandContext) -> Boolean> {
+        return ArrayList();
     }
 
-    fun permissions() : List<String> {
-        return listOf()
+    fun permissions() : ArrayList<String> {
+        return ArrayList()
     }
 }

@@ -1,7 +1,9 @@
 package org.notcascade.core.commands
 
-open class Node<T>(val key : String = "RootNode", val static : Boolean = false, var value : T? = null) {
-    val children = ArrayList<Node<T>>()
+import java.lang.RuntimeException
+
+open class Node<T>(private val key : String = "RootNode", private val static : Boolean = false, var value : T? = null, private val optional : Boolean = false) {
+    private val children = ArrayList<Node<T>>()
 
     fun addRoute(route : String, value : T, onlyStatic: Boolean = false) {
         val parts = splitRoute(route, value, onlyStatic)
@@ -13,27 +15,52 @@ open class Node<T>(val key : String = "RootNode", val static : Boolean = false, 
         return find(parts, ignoreParams)
     }
 
-    fun find(parts : MutableList<String>, ignoreParams: Boolean = false) : T? {
+    private fun hasOnlyOptionalChildren() : Boolean {
+        return children.all {
+            it.optional && it.hasOnlyOptionalChildren()
+        }
+    }
+
+    private fun optionalChild() : Node<T> {
+        if (children.isNotEmpty()) {
+            return children.filter {
+                it.optional && it.hasOnlyOptionalChildren()
+            }.first().optionalChild()
+        }
+        return this
+    }
+
+    private fun find(parts : MutableList<String>, ignoreParams: Boolean = false) : T? {
         val firstPart = parts.first()
         parts.removeAt(0)
 
-        val foundNode = children.find {
-            if (ignoreParams)
-                it.key.equals(firstPart, ignoreCase = true)
-             else
-                !it.static || it.key.equals(firstPart, ignoreCase = true)
+        var foundNode = children.find {
+            it.key.equals(firstPart, ignoreCase = true)
+        }
+
+        if (foundNode == null && !ignoreParams) {
+            foundNode = children.find {
+                    !it.static
+            }
         }
 
         if (foundNode != null) {
             if (parts.size > 0) {
                 return foundNode.find(parts, ignoreParams)
+            } else {
+                val optionalChild = foundNode.children.find {
+                    it.optional && it.hasOnlyOptionalChildren()
+                }
+                if (optionalChild != null) {
+                    return optionalChild.optionalChild().value
+                }
             }
             return foundNode.value
         }
         return value
     }
 
-    fun insertNodes(nodes : ArrayList<Node<T>>) {
+    private fun insertNodes(nodes : ArrayList<Node<T>>) {
         val node = nodes.first()
         nodes.removeAt(0)
 
@@ -55,16 +82,17 @@ open class Node<T>(val key : String = "RootNode", val static : Boolean = false, 
 
     }
 
-    fun splitRoute(route : String, value : T, onlyStatic: Boolean = false) : ArrayList<Node<T>> {
+    private fun splitRoute(route : String, value : T, onlyStatic: Boolean = false) : ArrayList<Node<T>> {
         val ret = ArrayList<Node<T>>()
 
         for (it in route.split(" ")) {
             if(it.startsWith("*")) {
-                ret.add(Node(it, onlyStatic, null))
+
+                ret.add(Node(it, onlyStatic, null, it.endsWith("?")))
                 break
             }
             if (it.startsWith(":")) {
-                ret.add(Node(it, onlyStatic, null))
+                ret.add(Node(it, onlyStatic, null, it.endsWith("?")))
             } else {
                 ret.add(Node(it, true, null))
             }

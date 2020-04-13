@@ -16,11 +16,6 @@ class ModuleBuilder(private val module: Module) {
         return commands
     }
 
-    fun lambdaCommand(key : String, init: LambdaCommandBuilder.() -> Unit) {
-        val builder = LambdaCommandBuilder(key).apply(init)
-        commands.add(builder.build())
-    }
-
     fun command(key : String, init: CommandBuilder.() -> Unit) {
         val builder = CommandBuilder(key).apply(init)
         commands.add(builder.build())
@@ -29,7 +24,7 @@ class ModuleBuilder(private val module: Module) {
     fun classCommand(init: () -> ICommandCore) {
         val core = init()
 
-        val cmd = Command(core.command(), module, core.description()) {
+        val cmd = Command(core.command(), module, core.description(), core.middleware(), core.permissions()) {
             core.onCommand(it)
         }
         commands.add(cmd)

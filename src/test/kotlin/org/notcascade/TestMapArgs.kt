@@ -47,4 +47,36 @@ class TestMapArgs {
         val out = mapArgs(rawInput, route)
         assertEquals("hello  there", out["message"])
     }
+
+    @Test fun TestMapArgsOptionalParam() {
+        val out = mapArgs("say hai", "say :message?")
+        assertEquals(
+            "hai",
+            out["message"]
+        )
+    }
+
+    @Test fun TestMapArgsOptionalParamEmpty() {
+        val out = mapArgs("say", "say :message?")
+        assertEquals(
+            null,
+            out["message"]
+        )
+    }
+
+    @Test fun TestMapArgsOptionalConcat() {
+        val out = mapArgs("say hai", "say *message?")
+        assertEquals(
+            "hai",
+            out["message"]
+        )
+    }
+
+    @Test fun TestMapArgsOptionalConcatEmpty() {
+        val out = mapArgs("say", "say *message?")
+        assertEquals(
+            null,
+            out["message"]
+        )
+    }
 }

@@ -1,0 +1,18 @@
+general:
+  module_not_enabled: "Module(%s) is not enabled"
+modules:
+  - key: "core"
+    name: "Core"
+    commandPrefix: ""
+    commands:
+      - key: "core.help"
+        route: "help :module? :command?"
+        alias: ["help :module? :command?"]
+  - key: "music"
+    name: "Music"
+    commandPrefix: "music "
+    commands:
+      - key: "music.play"
+        route: "play *query"
+        usage: "%splay <query>"
+        alias: ["play *query"]

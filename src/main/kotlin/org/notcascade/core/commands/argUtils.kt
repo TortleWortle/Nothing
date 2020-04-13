@@ -49,7 +49,8 @@ fun mapArgs(rawInput : String, rawRoute : String) : Map<String, String> {
         val route = routeIt.next()
 
         if (route.startsWith(":")) {
-            ret.put(route.substring(1), inp)
+            val key = route.removeSuffix("?")
+            ret.put(key.removePrefix(":"), inp)
         }
         if (route.startsWith("*")) {
             var buffer = inp
@@ -57,7 +58,8 @@ fun mapArgs(rawInput : String, rawRoute : String) : Map<String, String> {
                 buffer += " "
                 buffer += it
             }
-            ret.put(route.substring(1), buffer)
+            val key = route.removeSuffix("?")
+            ret[key.removePrefix("*")] = buffer
         }
     }
     return ret
