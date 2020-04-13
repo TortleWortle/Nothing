@@ -5,14 +5,13 @@ modules:
     name: "Core"
     commandPrefix: ""
     commands:
-      - key: "core.help"
+      - key: "help"
         route: "help :module? :command?"
-        alias: ["help :module? :command?"]
+        alias: []
   - key: "music"
     name: "Music"
     commandPrefix: "music "
     commands:
-      - key: "music.play"
+      - key: "play"
         route: "play *query"
-        usage: "%splay <query>"
         alias: ["play *query"]

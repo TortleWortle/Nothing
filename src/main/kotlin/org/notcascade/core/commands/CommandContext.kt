@@ -19,11 +19,6 @@ class CommandContext(val event : GuildMessageReceivedEvent, val args : Map<Strin
         event.channel.sendMessage(msg).queue()
     }
 
-    fun hasPermission(vararg permission : Permission) : Boolean {
-        val member = event.member ?: return false
-
-        return member.hasPermission(event.channel, permission.toMutableList())
-    }
 
     fun hasPermission(rawPerm : String) : Boolean {
         logger.debug(String.format("Checking perms %s for %s", rawPerm, event.author.asTag))
@@ -42,13 +37,8 @@ class CommandContext(val event : GuildMessageReceivedEvent, val args : Map<Strin
 
     private fun processPerm(member : Member, permission : String)  : Boolean {
         if (permission.startsWith("dguild.")) {
-            return try {
-                val perm = Permission.valueOf(permission.removePrefix("dguild."))
-                hasPermission(perm)
-            } catch (e : RuntimeException) {
-                logger.error("Discord permission that does not exist requested: " + permission.removePrefix("dguild."))
-                false
-            }
+            val perm = Permission.valueOf(permission.removePrefix("dguild."))
+            return member.hasPermission(perm)
         }
 
         return Random.nextInt(0..100) < 95

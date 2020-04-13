@@ -2,26 +2,31 @@ package org.notcascade.core.commands
 
 import java.lang.RuntimeException
 
-open class Node<T>(private val key : String = "RootNode", private val static : Boolean = false, var value : T? = null, private val optional : Boolean = false) {
+open class Node<T>(
+    private val key: String = "RootNode",
+    private val static: Boolean = false,
+    var value: T? = null,
+    private val optional: Boolean = false
+) {
     private val children = ArrayList<Node<T>>()
 
-    fun addRoute(route : String, value : T, onlyStatic: Boolean = false) {
+    fun addRoute(route: String, value: T, onlyStatic: Boolean = false) {
         val parts = splitRoute(route, value, onlyStatic)
         insertNodes(parts)
     }
 
-    fun find(route : String, ignoreParams: Boolean = false) : T?{
+    fun find(route: String, ignoreParams: Boolean = false): T? {
         val parts = splitContent(route).toMutableList()
         return find(parts, ignoreParams)
     }
 
-    private fun hasOnlyOptionalChildren() : Boolean {
+    private fun hasOnlyOptionalChildren(): Boolean {
         return children.all {
             it.optional && it.hasOnlyOptionalChildren()
         }
     }
 
-    private fun optionalChild() : Node<T> {
+    private fun optionalChild(): Node<T> {
         if (children.isNotEmpty()) {
             return children.filter {
                 it.optional && it.hasOnlyOptionalChildren()
@@ -30,7 +35,7 @@ open class Node<T>(private val key : String = "RootNode", private val static : B
         return this
     }
 
-    private fun find(parts : MutableList<String>, ignoreParams: Boolean = false) : T? {
+    private fun find(parts: MutableList<String>, ignoreParams: Boolean = false): T? {
         val firstPart = parts.first()
         parts.removeAt(0)
 
@@ -40,7 +45,7 @@ open class Node<T>(private val key : String = "RootNode", private val static : B
 
         if (foundNode == null && !ignoreParams) {
             foundNode = children.find {
-                    !it.static
+                !it.static
             }
         }
 
@@ -60,7 +65,7 @@ open class Node<T>(private val key : String = "RootNode", private val static : B
         return value
     }
 
-    private fun insertNodes(nodes : ArrayList<Node<T>>) {
+    private fun insertNodes(nodes: ArrayList<Node<T>>) {
         val node = nodes.first()
         nodes.removeAt(0)
 
@@ -82,13 +87,13 @@ open class Node<T>(private val key : String = "RootNode", private val static : B
 
     }
 
-    private fun splitRoute(route : String, value : T, onlyStatic: Boolean = false) : ArrayList<Node<T>> {
+    private fun splitRoute(route: String, value: T, onlyStatic: Boolean = false): ArrayList<Node<T>> {
         val ret = ArrayList<Node<T>>()
         for (it in route.split(" ")) {
             val escaped = it.startsWith("\\")
             val key = if (escaped) it.removePrefix("\\") else it
 
-            if(key.startsWith("*") && !escaped) {
+            if (key.startsWith("*") && !escaped) {
                 ret.add(Node(key, onlyStatic, null, key.endsWith("?")))
                 break
             }
