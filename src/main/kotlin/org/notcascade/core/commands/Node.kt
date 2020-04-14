@@ -26,9 +26,12 @@ open class Node<T>(
 
     private fun optionalChild(): Node<T> {
         if (children.isNotEmpty()) {
-            return children.filter {
+            val child = children.find {
                 it.optional && it.hasOnlyOptionalChildren()
-            }.first().optionalChild()
+            }
+            if (child != null) {
+                return child.optionalChild()
+            }
         }
         return this
     }
@@ -48,17 +51,12 @@ open class Node<T>(
         }
 
         if (foundNode != null) {
-            if (parts.size > 0) {
-                return foundNode.find(parts, ignoreParams)
+            return if (parts.size > 0) {
+                foundNode.find(parts, ignoreParams)
             } else {
-                val optionalChild = foundNode.children.find {
-                    it.optional && it.hasOnlyOptionalChildren()
-                }
-                if (optionalChild != null) {
-                    return optionalChild.optionalChild().value
-                }
+                val optionalChild = foundNode.optionalChild()
+                optionalChild.value
             }
-            return foundNode.value
         }
         return value
     }
