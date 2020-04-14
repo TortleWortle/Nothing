@@ -1,0 +1,24 @@
+commands:
+  alias:
+    - route: "regularify :person"
+      target: "lp user :person group add regular"
+      alias: ["reg :person", "regular :person"]
+  routes:
+    - key: "lp.user.add.group"
+      route: "lp user :person group add :group"
+      alias: []
+    - key: "core.help"
+      route: "help :module? :command?"
+      alias: []
+    - key: "music.play"
+      route: "play *query"
+      alias: []
+    - key: "tag.add"
+      route: "tag add :name *content"
+      alias: []
+    - key: "tag.remove"
+      route: "tag remove :name"
+      alias: []
+    - key: "tag.list"
+      route: "tag list"
+      alias: ["tags"]

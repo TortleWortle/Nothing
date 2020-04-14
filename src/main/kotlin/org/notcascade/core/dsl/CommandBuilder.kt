@@ -8,7 +8,7 @@ import kotlin.reflect.KFunction1
 class Command(
     val key: String,
     var module: Module,
-    val description: String,
+    var description: String,
     val middleware: ArrayList<(CommandContext) -> Boolean> = ArrayList(),
     val permissions: ArrayList<String> = ArrayList(),
     val exec: (CommandContext) -> Unit
@@ -23,8 +23,8 @@ class CommandBuilder(private val key: String) {
     var module: Module = Module.ORPHAN
     var description: String = ""
     var exec: ((CommandContext) -> Unit)? = null
-    val middleware: ArrayList<(CommandContext) -> Boolean> = ArrayList()
-    val permissions: ArrayList<String> = ArrayList()
+    var middleware: ArrayList<(CommandContext) -> Boolean> = ArrayList()
+    var permissions: ArrayList<String> = ArrayList()
 
     fun handler(init: () -> KFunction1<CommandContext, Unit>) {
         val func = init()

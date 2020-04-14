@@ -7,6 +7,9 @@ import org.notcascade.core.commands.CommandManager
 import org.notcascade.core.commands.Module
 import org.notcascade.core.dsl.commandManager
 import org.notcascade.modules.core.getCoreModuleCommands
+import org.notcascade.modules.music.getMusicModule
+import org.notcascade.modules.permissions.getPermissionModule
+import org.notcascade.modules.tags.getTagModule
 import org.slf4j.LoggerFactory
 
 fun main(args: Array<String>) {
@@ -32,13 +35,8 @@ fun main(args: Array<String>) {
 fun getCommandManager(): CommandManager {
     return commandManager {
         module { getCoreModuleCommands() }
-        module(Module.MUSIC) {
-            command("play *query") {
-                description = "Plays Music"
-                exec = { ctx ->
-                    ctx.reply(String.format("Searching for `%s`", ctx.args["query"]))
-                }
-            }
-        }
+        module { getMusicModule() }
+        module { getTagModule() }
+        module { getPermissionModule() }
     }
 }

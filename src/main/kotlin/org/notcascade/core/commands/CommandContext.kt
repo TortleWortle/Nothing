@@ -5,11 +5,12 @@ import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import org.koin.core.KoinComponent
 import org.koin.core.get
+import org.notcascade.core.dsl.Command
 import org.slf4j.Logger
 import kotlin.random.Random
 import kotlin.random.nextInt
 
-class CommandContext(val event: GuildMessageReceivedEvent, val args: Map<String, String>) : KoinComponent {
+class CommandContext(val event: GuildMessageReceivedEvent, val command : Command, val args: Map<String, String>) : KoinComponent {
     val logger: Logger = get()
     val cmdManager: CommandManager = get()
 
@@ -17,6 +18,14 @@ class CommandContext(val event: GuildMessageReceivedEvent, val args: Map<String,
         event.channel.sendMessage(msg).queue()
     }
 
+    fun replyEmbed(msg : String) {
+        reply(
+            String.format(
+                "```\n%s```",
+                msg
+            )
+        )
+    }
 
     fun hasPermission(rawPerm: String): Boolean {
         logger.debug(String.format("Checking perms %s for %s", rawPerm, event.author.asTag))

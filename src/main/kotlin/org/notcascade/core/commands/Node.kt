@@ -8,14 +8,59 @@ open class Node<T>(
 ) {
     private val children = ArrayList<Node<T>>()
 
-    fun addRoute(route: String, value: T, onlyStatic: Boolean = false) {
+    @Deprecated("Please use add instead", ReplaceWith("add(route, value, onlyStatic)"))
+    fun addRoute(route: String, value: T, onlyStatic: Boolean = false) = add(route, value, onlyStatic)
+
+
+    @Deprecated("Please use get instead", ReplaceWith("get(route, ignoreParams)"))
+    fun find(route: String, ignoreParams: Boolean = false): T? = get(route, ignoreParams)
+
+    fun add(route: String, value: T?, onlyStatic: Boolean = false) {
         val parts = splitRoute(route, value, onlyStatic)
         insertNodes(parts)
     }
 
-    fun find(route: String, ignoreParams: Boolean = false): T? {
+    fun get(route: String, ignoreParams: Boolean = false): T? = getNode(route, ignoreParams)?.value
+
+    fun set(route: String, value: T?, onlyStatic: Boolean = false) {
+        val node = getNode(route, ignoreParams = true)
+        if (node.value == null) {
+            return add(route, value, onlyStatic)
+        }
+
+        node.value = value
+    }
+
+    fun count(): Int {
+        val count = children.count {
+            it.value != null
+        }
+        return children.fold(count) { acc, node ->
+            val new = acc + node.count()
+            new
+        }
+    }
+
+    fun remove(route: String) {
+        set(route, null, onlyStatic = true)
+        return cleanup()
+    }
+
+    private fun isDeadEnd(): Boolean {
+        return value == null && children.all {
+            it.value == null && it.isDeadEnd()
+        }
+    }
+
+    private fun cleanup() {
+        children.removeAll {
+            it.isDeadEnd()
+        }
+    }
+
+    fun getNode(route: String, ignoreParams: Boolean = false): Node<T> {
         val parts = splitContent(route).toMutableList()
-        return find(parts, ignoreParams)
+        return getNode(parts, ignoreParams)
     }
 
     private fun hasOnlyOptionalChildren(): Boolean {
@@ -36,7 +81,7 @@ open class Node<T>(
         return this
     }
 
-    private fun find(parts: MutableList<String>, ignoreParams: Boolean = false): T? {
+    private fun getNode(parts: MutableList<String>, ignoreParams: Boolean = false): Node<T> {
         val firstPart = parts.first()
         parts.removeAt(0)
 
@@ -52,13 +97,13 @@ open class Node<T>(
 
         if (foundNode != null) {
             return if (parts.size > 0) {
-                foundNode.find(parts, ignoreParams)
+                foundNode.getNode(parts, ignoreParams)
             } else {
                 val optionalChild = foundNode.optionalChild()
-                optionalChild.value
+                optionalChild
             }
         }
-        return value
+        return this
     }
 
     private fun insertNodes(nodes: ArrayList<Node<T>>) {
@@ -83,7 +128,7 @@ open class Node<T>(
 
     }
 
-    private fun splitRoute(route: String, value: T, onlyStatic: Boolean = false): ArrayList<Node<T>> {
+    private fun splitRoute(route: String, value: T?, onlyStatic: Boolean = false): ArrayList<Node<T>> {
         val ret = ArrayList<Node<T>>()
         for (it in route.split(" ")) {
             val escaped = it.startsWith("\\")

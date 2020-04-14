@@ -79,4 +79,13 @@ class TestMapArgs {
             out["message"]
         )
     }
+
+    @Test fun TestMapArgsConcatSingle() {
+        val route = "tell :person *message"
+        val rawInput = "tell john hello"
+
+        val out = mapArgs(rawInput, route)
+        assertEquals("john", out["person"])
+        assertEquals("hello", out["message"])
+    }
 }
