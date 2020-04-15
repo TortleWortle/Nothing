@@ -43,27 +43,24 @@ class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
     }
 
 
-    fun handleCommand(rawMsg: String, event: GuildMessageReceivedEvent) {
+    fun getCmdAndArgs(rawMsg : String) : Pair<Command, Map<String, String>>? {
         val pair = root.get(rawMsg)
 
         // if command has been found do your thing
         if (pair != null) {
             val (cmd, route) = pair
             val args = mapArgs(rawMsg, route)
-            val ctx = CommandContext(event, cmd, args)
-            execCommand(cmd, ctx)
-            return
+            return Pair(cmd, args)
         }
 
+        return null
+    }
+
+    fun getAliasCmdAndArgs(rawMsg: String) : Pair<Command, Map<String, String>>? {
         // grab alias pair from rawMsg
-        val alias = aliasRoot.get(rawMsg)
+        val alias = aliasRoot.get(rawMsg) ?: return null
 
         // if there's no alias go handle tags.
-        if (alias == null) {
-            logger.info(String.format("%s called undefined command: %s", event.author.asTag, rawMsg))
-            handleTag(rawMsg, event)
-            return
-        }
 
         // grab route and targetRoute from alias
         val (route, targetRoute) = alias
@@ -74,7 +71,7 @@ class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
         // if original pair can't be found that means there's an alias with an invalid target.
         if (originalPair == null) {
             logger.error(String.format("Alias called with invalid target %s", targetRoute))
-            return
+            return null
         }
 
         val (cmd, originalRoute) = originalPair
@@ -88,9 +85,28 @@ class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
         // merge args
         val args = mergeMaps(defaultArgs, aliasArgs)
 
-        val ctx = CommandContext(event, cmd, args)
+        return Pair(cmd, args)
+    }
 
+    fun getTagCmdAndArgs(rawMsg: String) : Pair<Command, Map<String, String>> {
+        val args = HashMap<String, String>()
+        val cmd = Command("handle.tag", Module.TAGS, "Handles tag", exec = {
+            val tag = TagManager.getTag(it.event.guild.id, rawMsg)
+            if (tag != null) {
+                it.event.channel.sendMessage(tag).queue()
+            }
+        })
+
+        return Pair(cmd, args)
+    }
+
+    fun handleCommand(rawMsg: String, event: GuildMessageReceivedEvent) {
+        val pair = getCmdAndArgs(rawMsg) ?: getAliasCmdAndArgs(rawMsg) ?: getTagCmdAndArgs(rawMsg)
+
+        val (cmd, args) = pair
+        val ctx = CommandContext(event, cmd, args)
         execCommand(cmd, ctx)
+        return
     }
 
     fun mergeMaps(first: Map<String, String>, second: Map<String, String>): Map<String, String> {
@@ -102,13 +118,6 @@ class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
             ret.replace(it.key, it.value)
         }
         return ret
-    }
-
-    fun handleTag(rawMsg: String, event: GuildMessageReceivedEvent) {
-        val tag = TagManager.getTag(event.guild.id, rawMsg)
-        if (tag != null) {
-            event.channel.sendMessage(tag).queue()
-        }
     }
 
     private fun execCommand(cmd: Command, ctx: CommandContext) {

@@ -2,9 +2,9 @@ package org.notcascade.core.commands
 
 open class Node<T>(
     private val key: String = "RootNode",
-    private val static: Boolean = false,
+    val static: Boolean = false,
     var value: T? = null,
-    private val optional: Boolean = false
+    val optional: Boolean = false
 ) {
     private val children = ArrayList<Node<T>>()
 
@@ -16,7 +16,7 @@ open class Node<T>(
     fun find(route: String, ignoreParams: Boolean = false): T? = get(route, ignoreParams)
 
     fun add(route: String, value: T?, onlyStatic: Boolean = false) {
-        val parts = splitRoute(route, value, onlyStatic)
+        val parts : MutableList<Node<T>> = splitRoute(route, value, onlyStatic)
         insertNodes(parts)
     }
 
@@ -106,7 +106,7 @@ open class Node<T>(
         return this
     }
 
-    private fun insertNodes(nodes: ArrayList<Node<T>>) {
+    private fun insertNodes(nodes: MutableList<Node<T>>) {
         val node = nodes.first()
         nodes.removeAt(0)
 
@@ -127,25 +127,26 @@ open class Node<T>(
         }
 
     }
+}
 
-    private fun splitRoute(route: String, value: T?, onlyStatic: Boolean = false): ArrayList<Node<T>> {
-        val ret = ArrayList<Node<T>>()
-        for (it in route.split(" ")) {
-            val escaped = it.startsWith("\\")
-            val key = if (escaped) it.removePrefix("\\") else it
 
-            if (key.startsWith("*") && !escaped) {
-                ret.add(Node(key, onlyStatic, null, key.endsWith("?")))
-                break
-            }
-            if (key.startsWith(":") && !escaped) {
-                ret.add(Node(key, onlyStatic, null, key.endsWith("?")))
-            } else {
-                ret.add(Node(key, true, null))
-            }
+fun <T> splitRoute(route: String, value: T?, onlyStatic: Boolean = false): MutableList<Node<T>> {
+    val ret = ArrayList<Node<T>>()
+    for (it in route.split(" ")) {
+        val escaped = it.startsWith("\\")
+        val key = if (escaped) it.removePrefix("\\") else it
+
+        if (key.startsWith("*") && !escaped) {
+            ret.add(Node(key, onlyStatic, null, key.endsWith("?")))
+            break
         }
-        ret.last().value = value
-
-        return ret
+        if (key.startsWith(":") && !escaped) {
+            ret.add(Node(key, onlyStatic, null, key.endsWith("?")))
+        } else {
+            ret.add(Node(key, true, null))
+        }
     }
+    ret.last().value = value
+
+    return ret
 }
