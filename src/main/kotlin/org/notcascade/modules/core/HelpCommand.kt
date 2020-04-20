@@ -12,7 +12,7 @@ class HelpCommand : ICommandCore, KoinComponent {
 
         if (mod != null) {
             ctx.replyEmbed(
-                ctx.cmdManager.commands.filter {
+                ctx.commandManager.commands.filter {
                     it.module == mod
                 }.joinToString("\n") {
                     it.key + " | " + it.description
@@ -28,7 +28,7 @@ class HelpCommand : ICommandCore, KoinComponent {
 
         if (mod != null) {
             ctx.replyEmbed(
-                ctx.cmdManager.commands.find {
+                ctx.commandManager.commands.find {
                     it.module == mod
                 }?.description ?: "Command not found"
             )
@@ -44,7 +44,7 @@ class HelpCommand : ICommandCore, KoinComponent {
         else if(module != null) return replyModule(ctx, module)
 
         ctx.replyEmbed(
-            ctx.cmdManager.commands.joinToString("\n") {
+            ctx.commandManager.commands.joinToString("\n") {
                 it.key + " | " + it.description
             }
         )

@@ -9,12 +9,12 @@ fun playCommand(ctx : CommandContext) {
     ctx.reply("Yesss")
 }
 
-fun getMusicModule() : ArrayList<Command> {
-    return moduleBuilder(Module.MUSIC) {
-        command("music.play") {
-            handler { ::playCommand }
-            description = "Plays music!"
-            permissions = arrayListOf("music.play")
-        }
-    }
-}
+//fun getMusicModule() : ArrayList<Command> {
+//    return moduleBuilder(Module.MUSIC) {
+//        command("music.play") {
+//            handler { ::playCommand }
+//            description = "Plays music!"
+//            permissions = arrayListOf("music.play")
+//        }
+//    }
+//}

@@ -1,8 +1,8 @@
 commands:
   alias:
-    - route: "regularify :person"
-      target: "lp user :person group add regular"
-      alias: ["reg :person", "regular :person"]
+    - route: "regularify :user"
+      target: "lp user :user group add regular"
+      alias: ["reg :user", "regular :user"]
   routes:
     - key: "lp.user.add.group"
       route: "lp user :person group add :group"
@@ -22,3 +22,15 @@ commands:
     - key: "tag.list"
       route: "tag list"
       alias: ["tags"]
+    - key: "test"
+      route: "test"
+      alias: []
+    - key: "kick.user"
+      route: "kick :person *reason?"
+      alias: []
+    - key: "channel.clear"
+      route: "clear"
+      alias: []
+    - key: "kill"
+      route: "shutdown"
+      alias: []

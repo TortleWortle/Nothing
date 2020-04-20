@@ -1,7 +1,7 @@
 package org.notcascade.core.commands
 
 import com.uchuhimo.konf.Config
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.notcascade.Alias
@@ -24,7 +24,6 @@ class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
             val route = routes.find { route ->
                 command.key == route.key
             }
-            // TODO: use i18n to fetch route
             if (route != null) {
                 root.add(route.route, Pair(command, route.route))
                 route.alias.forEach {
@@ -43,7 +42,7 @@ class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
     }
 
 
-    fun getCmdAndArgs(rawMsg : String) : Pair<Command, Map<String, String>>? {
+    fun getCmdAndArgs(rawMsg: String): Pair<Command, Map<String, String>>? {
         val pair = root.get(rawMsg)
 
         // if command has been found do your thing
@@ -56,80 +55,88 @@ class CommandManager(val commands: ArrayList<Command>) : KoinComponent {
         return null
     }
 
-    fun getAliasCmdAndArgs(rawMsg: String) : Pair<Command, Map<String, String>>? {
+    fun getAliasCmdAndArgs(rawMsg: String): Pair<Command, Map<String, String>>? {
         // grab alias pair from rawMsg
         val alias = aliasRoot.get(rawMsg) ?: return null
-
-        // if there's no alias go handle tags.
 
         // grab route and targetRoute from alias
         val (route, targetRoute) = alias
 
+        val aliasArgs = mapArgs(rawMsg, route)
+
+        var target = targetRoute
+
+        aliasArgs.forEach {
+            val value = it.value
+            value.replace("\"", "\\\"")
+            target = target.replace("*" + it.key, "\"" + value + "\"")
+                .replace(":" + it.key, "\"" + value + "\"")
+        }
+
         // fetch original command from targetRoute
-        val originalPair = root.get(targetRoute)
+        val originalPair = root.get(target)
 
         // if original pair can't be found that means there's an alias with an invalid target.
         if (originalPair == null) {
-            logger.error(String.format("Alias called with invalid target %s", targetRoute))
+            logger.error(String.format("Alias called with invalid target %s", target))
             return null
         }
 
         val (cmd, originalRoute) = originalPair
+        val defaultArgs = mapArgs(target, originalRoute)
 
-        // grab arguments from the message and current route
-        val aliasArgs = mapArgs(rawMsg, route)
-        // grab arguments from the targetRoute and originalRoute
-        // this is so that an alias can specify defaults for an argument
-        val defaultArgs = mapArgs(targetRoute, originalRoute)
-
-        // merge args
-        val args = mergeMaps(defaultArgs, aliasArgs)
-
-        return Pair(cmd, args)
+        return Pair(cmd, defaultArgs)
     }
 
-    fun getTagCmdAndArgs(rawMsg: String) : Pair<Command, Map<String, String>> {
+    fun getTagCmdAndArgs(rawMsg: String): Pair<Command, Map<String, String>> {
         val args = HashMap<String, String>()
-        val cmd = Command("handle.tag", Module.TAGS, "Handles tag", exec = {
-            val tag = TagManager.getTag(it.event.guild.id, rawMsg)
-            if (tag != null) {
-                it.event.channel.sendMessage(tag).queue()
+
+        class tagHandler(ctx: CommandContext) : ExecutableCommand(ctx) {
+            override fun exec() {
+                val tag = TagManager.getTag(ctx.event.guild.id, rawMsg)
+                if (tag != null) {
+                    ctx.event.channel.sendMessage(tag).queue()
+                }
             }
-        })
+        }
+
+        val cmd = Command(
+            module = Module.TAGS,
+            description = String.format("tag handler"),
+            key = "tag.handler",
+            new = {
+                tagHandler(it)
+            }
+        )
+
 
         return Pair(cmd, args)
     }
 
-    fun handleCommand(rawMsg: String, event: GuildMessageReceivedEvent) {
+    fun handleCommand(rawMsg: String, event: MessageReceivedEvent) {
         val pair = getCmdAndArgs(rawMsg) ?: getAliasCmdAndArgs(rawMsg) ?: getTagCmdAndArgs(rawMsg)
 
         val (cmd, args) = pair
-        val ctx = CommandContext(event, cmd, args)
+        val ctx = CommandContext(event, args)
         execCommand(cmd, ctx)
         return
     }
 
-    fun mergeMaps(first: Map<String, String>, second: Map<String, String>): Map<String, String> {
-        val ret = HashMap<String, String>()
-        first.forEach {
-            ret.put(it.key, it.value)
-        }
-        second.forEach {
-            ret.replace(it.key, it.value)
-        }
-        return ret
-    }
-
     private fun execCommand(cmd: Command, ctx: CommandContext) {
-        val pass = cmd.middleware.all {
-            it(ctx)
+        if (!cmd.checkMiddleware(ctx)) {
+            logger.info(String.format("%s failed middleware checks for %s", ctx.event.author.asTag, cmd.key))
         }
 
-        if (pass) {
-            logger.info(String.format("%s executing command %s", ctx.event.author.asTag, cmd.key))
-            cmd.exec(ctx)
-        } else {
-            logger.info(String.format("%s failed middleware checks for %s", ctx.event.author.asTag, cmd.key))
+        logger.info(String.format("%s executing command %s", ctx.event.author.asTag, cmd.key))
+        try {
+            val realCmd = cmd.new(ctx)
+            realCmd.exec()
+        } catch (e: ParamFuckyWuckyException) {
+            if (e.showUsage) {
+                ctx.replyEmbed(cmd.description)
+            } else {
+                ctx.replyEmbed(e.message)
+            }
         }
     }
 }

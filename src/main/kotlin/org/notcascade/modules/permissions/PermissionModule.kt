@@ -14,13 +14,13 @@ fun addGroup(ctx : CommandContext) {
     )
 }
 
-fun getPermissionModule() : ArrayList<Command> {
-    return moduleBuilder(Module.TAGS) {
-        command("lp.user.add.group") {
-            description = "Add a tag"
-            handler {
-                ::addGroup
-            }
-        }
-    }
-}
+//fun getPermissionModule() : ArrayList<Command> {
+//    return moduleBuilder(Module.TAGS) {
+//        command("lp.user.add.group") {
+//            description = "Add a tag"
+//            handler {
+//                ::addGroup
+//            }
+//        }
+//    }
+//}

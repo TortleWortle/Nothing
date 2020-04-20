@@ -3,6 +3,7 @@ package org.notcascade
 import com.uchuhimo.konf.Config
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.koin.core.KoinComponent
@@ -13,8 +14,8 @@ class MessageListener(private val commandManager: CommandManager) : ListenerAdap
     val config : Config = get();
     val prefix : String = config["bot.defaultPrefix"]
 
-    override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
-        super.onGuildMessageReceived(event)
+    override fun onMessageReceived(event: MessageReceivedEvent) {
+        super.onMessageReceived(event)
         if (!event.message.contentRaw.startsWith(prefix)) return
         val content = event.message.contentRaw.removePrefix(prefix)
         if (content.isEmpty()) return

@@ -8,19 +8,12 @@ open class Node<T>(
 ) {
     private val children = ArrayList<Node<T>>()
 
-    @Deprecated("Please use add instead", ReplaceWith("add(route, value, onlyStatic)"))
-    fun addRoute(route: String, value: T, onlyStatic: Boolean = false) = add(route, value, onlyStatic)
-
-
-    @Deprecated("Please use get instead", ReplaceWith("get(route, ignoreParams)"))
-    fun find(route: String, ignoreParams: Boolean = false): T? = get(route, ignoreParams)
-
     fun add(route: String, value: T?, onlyStatic: Boolean = false) {
         val parts : MutableList<Node<T>> = splitRoute(route, value, onlyStatic)
         insertNodes(parts)
     }
 
-    fun get(route: String, ignoreParams: Boolean = false): T? = getNode(route, ignoreParams)?.value
+    fun get(route: String, ignoreParams: Boolean = false): T? = getNode(route, ignoreParams).value
 
     fun set(route: String, value: T?, onlyStatic: Boolean = false) {
         val node = getNode(route, ignoreParams = true)
