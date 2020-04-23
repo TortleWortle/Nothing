@@ -1,6 +1,6 @@
 package com.github.tortlewortle.nothing
 
-typealias contextBuilder<EVENT, CTX> = (EVENT, args: Map<String, String>) -> CTX
+typealias contextBuilder<EVENT, CTX> = (EVENT, Command<CTX>, args: Map<String, String>) -> CTX
 typealias rawMessageBuilder<EVENT> = (EVENT) -> String
 
 class CommandManager<EVENT, CTX : ICommandContext>(
@@ -46,7 +46,7 @@ class CommandManager<EVENT, CTX : ICommandContext>(
         }
 
         val args = mapArgs(rawMsg, cmd.route)
-        val ctx = contextBuilder(event, args)
+        val ctx = contextBuilder(event, cmd, args)
 
         if (!middleware.all { it(ctx) }) return
         if (!cmd.middleware.all { it(ctx) }) return

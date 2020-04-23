@@ -30,6 +30,7 @@ fun main(args : Array<String>) {
 class MyContext(
     val event: ChannelMessageEvent,
     val client: TwitchClient,
+    val command: Command<MyContext>,
     override val args: Map<String, String>
 ) : ICommandContext {
     fun reply(msg: String) {
@@ -37,14 +38,15 @@ class MyContext(
     }
 }
 
-class MyCommand(override val ctx : MyContext) : CommandExecutor(ctx) {
+class MyCommand(ctx : MyContext) : CommandExecutor<MyContext>(ctx) {
     override fun exec() {
         ctx.reply("boomer")
     }
 }
-class MyCommandWithParam(override val ctx : MyContext) : CommandExecutor(ctx) {
+class MyCommandWithParam(ctx : MyContext) : CommandExecutor<MyContext>(ctx) {
     val message by required<String>()
     override fun exec() {
+        ctx.reply(ctx.command.description)
         ctx.reply(message)
     }
 }
@@ -54,8 +56,8 @@ fun cmdManager(client: TwitchClient): CommandManager<ChannelMessageEvent, MyCont
         middleware {
             true
         }
-        contextBuilder = { event, args ->
-            MyContext(event, client, args)
+        contextBuilder = { event, cmd, args ->
+            MyContext(event, client, cmd, args)
         }
         rawMessageBuilder = {
             it.message
@@ -64,6 +66,7 @@ fun cmdManager(client: TwitchClient): CommandManager<ChannelMessageEvent, MyCont
             println(String.format("Command: \"%s\" not found", it.message))
         }
         command {
+            name = "ok"
             category = "core"
             description = "My test command."
             route = "ok"
@@ -71,6 +74,7 @@ fun cmdManager(client: TwitchClient): CommandManager<ChannelMessageEvent, MyCont
             exec = { MyCommand(it) }
         }
         command {
+            name = "say"
             category = "core"
             description = "My test command."
             route = "say *message"

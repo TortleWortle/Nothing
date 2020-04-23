@@ -5,6 +5,7 @@ import com.github.tortlewortle.nothing.ICommandContext
 import com.github.tortlewortle.nothing.ICommandExecutor
 
 class CommandBuilder<CTX : ICommandContext> {
+    lateinit var name : String
     lateinit var route : String
     var description = ""
     var category = "default"
@@ -12,7 +13,7 @@ class CommandBuilder<CTX : ICommandContext> {
     val middlewares = ArrayList<(CTX) -> Boolean>()
 
     fun build() : Command<CTX> {
-        return Command(route, description, category, middlewares, exec)
+        return Command(name, route, description, category, middlewares, exec)
     }
 
     fun middleware(fn : (CTX) -> Boolean) {
