@@ -9,8 +9,13 @@ class CommandBuilder<CTX : ICommandContext> {
     var description = ""
     var category = "default"
     lateinit var exec : (CTX) -> ICommandExecutor
+    val middlewares = ArrayList<(CTX) -> Boolean>()
 
     fun build() : Command<CTX> {
-        return Command(route, description, category, exec)
+        return Command(route, description, category, middlewares, exec)
+    }
+
+    fun middleware(fn : (CTX) -> Boolean) {
+        middlewares.add(fn)
     }
 }

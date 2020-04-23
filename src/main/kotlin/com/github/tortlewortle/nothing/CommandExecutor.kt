@@ -53,11 +53,5 @@ fun <T> doParamMagic(ckClass: KClass<*>, fn : ((String) -> T?)?, thisRef: Comman
     // probably make some reusable shit for this.
     return param as T
 
-//    val converter = Convertibles.typeStuff.get(ckClass)
-//
-//    if (converter != null) {
-//        return converter(param, thisRef.ctx) as T
-//    }
-
     error(String.format("No converter found for %s.", ckClass.qualifiedName))
 }

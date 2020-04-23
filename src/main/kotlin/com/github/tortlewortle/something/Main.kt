@@ -62,6 +62,7 @@ fun myBuilder(): CommandManager<MessageReceivedEvent, MyContext> {
             category = "core"
             description = "My test command."
             route = "test"
+            middleware { true }
             exec = { MyCommand(it) }
         }
         command {

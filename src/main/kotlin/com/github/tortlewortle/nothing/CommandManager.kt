@@ -10,7 +10,7 @@ class CommandManager<EVENT, CTX : ICommandContext>(
     val errorHandler: ((RuntimeException, EVENT) -> Unit)?,
     val commands: ArrayList<Command<CTX>>,
     val prefixes: ArrayList<(EVENT) -> (String)>,
-    val middleware : ArrayList<(CTX) -> Boolean>
+    val middleware: ArrayList<(CTX) -> Boolean>
 ) {
     val root = Node<Command<CTX>>()
 
@@ -20,7 +20,7 @@ class CommandManager<EVENT, CTX : ICommandContext>(
         }
     }
 
-    fun matchPrefix(event: EVENT, content : String) : String? {
+    fun matchPrefix(event: EVENT, content: String): String? {
         for (fn in prefixes) {
             val prefix = fn(event)
 
@@ -29,7 +29,7 @@ class CommandManager<EVENT, CTX : ICommandContext>(
             }
             val rawMsg = content.removePrefix(prefix)
             if (rawMsg.isBlank()) return null
-            return  rawMsg
+            return rawMsg
         }
         return null
     }
@@ -44,16 +44,20 @@ class CommandManager<EVENT, CTX : ICommandContext>(
             defaultHandler?.let { it(event) }
             return
         }
+
         val args = mapArgs(rawMsg, cmd.route)
         val ctx = contextBuilder(event, args)
 
-        if(!middleware.all { it(ctx) }) return
+        if (!middleware.all { it(ctx) }) return
+        if (!cmd.middleware.all { it(ctx) }) return
 
         try {
             cmd.exec(ctx).exec()
-        } catch (e: java.lang.RuntimeException) {
-            errorHandler?.let {
-                it(e, event)
+        } catch (e: RuntimeException) {
+            if (errorHandler != null) {
+                errorHandler.invoke(e, event)
+            } else {
+                throw(e)
             }
         }
     }

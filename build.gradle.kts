@@ -4,13 +4,14 @@ plugins {
     id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 
-group = "org.notcascade"
+group = "com.github.tortlewortle"
 version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
     jcenter()
     maven("https://jitpack.io")
+    maven("https://oss.jfrog.org/artifactory/libs-release")
 }
 
 
@@ -26,6 +27,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.3")
 
     implementation("com.github.uchuhimo.konf:konf:0.22.1")
+
+    implementation("com.github.twitch4j:twitch4j:1.0.0-alpha.19")
 
     testImplementation("junit:junit:4.11")
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.3.71")
